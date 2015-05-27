@@ -6,6 +6,7 @@
  * 5.23.15
  */
 
+//XXX change package
 package hw8solutions;
 
 import static org.junit.Assert.*;
@@ -31,14 +32,20 @@ public class UnicalcTester
 {
   private Unicalc unicalc1;
   private Unicalc unicalc2;
+  private Unicalc unicalc3;
+  private Unicalc unicalc4;
+  private Unicalc unicalc5;
+
   private List<String> empty;
-  private LinkedList<String> toks1;
-  private LinkedList<String> toks2;
-  private LinkedList<String> toks3;
-  private Quantity  quantity1;
-  private Quantity  quantity2;
-  private Quantity  quantity3;
-  private Quantity  quantity4;
+  private Quantity two;
+  private Quantity three;
+  private Quantity fiveMeter;
+  private Quantity twoMeter;
+  private Quantity sixSecond;
+  private Quantity threeSecond;
+  private Quantity fourPound;
+  private Quantity zeroFeet;
+  private Quantity oneYear;
 
   /**
    * Setup the tests and initialize class variables.
@@ -46,17 +53,30 @@ public class UnicalcTester
   @Before
   public void setUp()
   {
+    //create empty list
+    empty = Collections.<String>emptyList();
+
+    //create new unicalc objects and its tokens
     unicalc1 = new Unicalc();
-    unicalc1.tokenize("2^3");
+    unicalc1.tokenize("2 ^ 3");
     unicalc2 = new Unicalc();
     unicalc2.tokenize("2(3)");
-    toks1 = new LinkedList<String>( Tokenizer.tokenize("meter"));
-    toks2 = new LinkedList<String>( Tokenizer.tokenize("hour"));
-    toks3 = new LinkedList<String>( Tokenizer.tokenize("day"));
-    quantity1 = new Quantity(10.0,Arrays.asList("meter"),Arrays.asList("second"));
-    quantity2 = new Quantity(20.0,Arrays.asList("km"),Arrays.asList("hour"));
-    quantity3 = new Quantity(30.0,Arrays.asList("smoot"),Arrays.asList("second"));
-    quantity4 = new Quantity(2.0);
+    unicalc3 = new Unicalc();
+    unicalc3.tokenize("5 meter + 2 meter");
+    unicalc4 = new Unicalc();
+    unicalc4.tokenize("(6 second - 3 second) * 4 pound");
+    unicalc5 = new Unicalc();
+    unicalc5.tokenize("0 feet / 1 year");
+
+    two = new Quantity(2, empty, empty);
+    three = new Quantity(3, empty, empty);
+    fiveMeter = new Quantity(5, Arrays.asList("meter"), empty);
+    twoMeter = new Quantity(2, Arrays.asList("meter"), empty);
+    sixSecond = new Quantity(6, Arrays.asList("second"), empty);
+    threeSecond = new Quantity(3, Arrays.asList("second"), empty);
+    fourPound = new Quantity(4, Arrays.asList("pound"), empty);
+    zeroFeet = new Quantity(0, Arrays.asList("feet"), empty);
+    oneYear = new Quantity(1, Arrays.asList("year"), empty);
   }
 
   /**
