@@ -18,21 +18,21 @@ import java.util.*;
 public class ASTTester {
 
   //class variables
-  List<String> emptyList;
-  Map<String,Quantity> db;
-  QuantityDB database;
-  Quantity num0;
-  Quantity num1;
-  Quantity num2;
-  Quantity num3;
-  Quantity num4;
+  private List<String> emptyList;
+  private Map<String,Quantity> db;
+  private QuantityDB database;
+  private Quantity num0;
+  private Quantity num1;
+  private Quantity num2;
+  private Quantity num3;
+  private Quantity num4;
 
   //class variables that are going to be tested
-  Value val0;
-  Value val1;
-  Value val2;
-  Value val3;
-  Value val4;
+  private Value val0;
+  private Value val1;
+  private Value val2;
+  private Value val3;
+  private Value val4;
 
   /**
    * Set up tests and initialize class variables.
