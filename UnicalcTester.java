@@ -6,7 +6,7 @@
  * 5.23.15
  */
 
-package hw8solutions;
+package hw8;
 
 import static org.junit.Assert.*;
 import org.junit.*;
