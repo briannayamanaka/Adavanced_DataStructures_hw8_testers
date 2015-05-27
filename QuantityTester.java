@@ -18,17 +18,17 @@ import java.util.*;
 public class QuantityTester {
 
   //create some new Quantities for tests
-  List<String> emptyList;
-  Map<String,Quantity> db;
-  Map<String,Quantity> extend;
-  List<String> emp;
-  QuantityDB database;
-  Quantity empty;
-  Quantity centimeter;
-  Quantity horsepower;
-  Quantity day;
-  Quantity year;
-  Quantity gravC; //gravitational constant
+  private List<String> emptyList;
+  private Map<String,Quantity> db;
+  private Map<String,Quantity> extend;
+  private List<String> emp;
+  private QuantityDB database;
+  private Quantity empty;
+  private Quantity centimeter;
+  private Quantity horsepower;
+  private  Quantity day;
+  private Quantity year;
+  private Quantity gravC; //gravitational constant
 
   /**
    * Setup the tests and initialize them.
