@@ -6,7 +6,6 @@
  * 5.23.15
  */
 
-//XXX change package
 package hw8solutions;
 
 import static org.junit.Assert.*;
@@ -35,112 +34,118 @@ public class UnicalcTester
   private Unicalc unicalc3;
   private Unicalc unicalc4;
   private Unicalc unicalc5;
+  private Unicalc unicalc6;
+  private Unicalc unicalc7;
+  private Unicalc unicalc8;
+  private Unicalc unicalc9;
 
   private List<String> empty;
-  private Quantity two;
-  private Quantity three;
-  private Quantity fiveMeter;
-  private Quantity twoMeter;
-  private Quantity sixSecond;
-  private Quantity threeSecond;
-  private Quantity fourPound;
-  private Quantity zeroFeet;
-  private Quantity oneYear;
+  private LinkedList<String> toks1;
+  private LinkedList<String> toks2;
+  private LinkedList<String> toks3;
+  private Quantity quantity1;
+  private Quantity quantity2;
+  private Quantity quantity3;
+  private Quantity quantity4;
+  private Map<String,Quantity> database;
 
   /**
    * Setup the tests and initialize class variables.
    */
   @Before
-  public void setUp()
-  {
-    //create empty list
-    empty = Collections.<String>emptyList();
+    public void setUp()
+    {
+      empty = new ArrayList<String>();
+      database = new HashMap<String,Quantity>();
+      database.put("km", new Quantity(1000, Arrays.asList("meter"), empty));
+      empty = Collections.<String>emptyList();
+      unicalc1 = new Unicalc();
+      unicalc1.tokenize("2^3");
+      unicalc2 = new Unicalc();
+      unicalc2.tokenize("2(3)");
+      unicalc3 = new Unicalc();
+      unicalc3.tokenize("-2");
+      unicalc4 = new Unicalc();
+      unicalc4.tokenize("2*3");
+      unicalc5 = new Unicalc();
+      unicalc5.tokenize("2/3");
+      unicalc6 = new Unicalc();
+      unicalc6.tokenize("2+3");
+      unicalc7 = new Unicalc();
+      unicalc7.tokenize("2-3");
+      unicalc8 = new Unicalc();
+      unicalc8.tokenize("# 3km");
+      unicalc9 = new Unicalc();
+      unicalc9.tokenize("def km 3 m");
 
-    //create new unicalc objects and its tokens
-    unicalc1 = new Unicalc();
-    unicalc1.tokenize("2 ^ 3");
-    unicalc2 = new Unicalc();
-    unicalc2.tokenize("2(3)");
-    unicalc3 = new Unicalc();
-    unicalc3.tokenize("5 meter + 2 meter");
-    unicalc4 = new Unicalc();
-    unicalc4.tokenize("(6 second - 3 second) * 4 pound");
-    unicalc5 = new Unicalc();
-    unicalc5.tokenize("0 feet / 1 year");
+      quantity1 = new Quantity(10.0,Arrays.asList("meter"),
+          Arrays.asList("second"));
+      quantity2 = new Quantity(20.0,Arrays.asList("km"),Arrays.asList("hour"));
+      quantity3 = new Quantity(30.0,Arrays.asList("smoot"),
+          Arrays.asList("second"));
+      quantity4 = new Quantity(2.0,empty,empty);
+    }
 
-    two = new Quantity(2, empty, empty);
-    three = new Quantity(3, empty, empty);
-    fiveMeter = new Quantity(5, Arrays.asList("meter"), empty);
-    twoMeter = new Quantity(2, Arrays.asList("meter"), empty);
-    sixSecond = new Quantity(6, Arrays.asList("second"), empty);
-    threeSecond = new Quantity(3, Arrays.asList("second"), empty);
-    fourPound = new Quantity(4, Arrays.asList("pound"), empty);
-    zeroFeet = new Quantity(0, Arrays.asList("feet"), empty);
-    oneYear = new Quantity(1, Arrays.asList("year"), empty);
-  }
-
-  /**
-   *
-   */
+  /** This method checks if R method correctly deals with exponents */
   @Test
-  public void testR()
-  {
-    //pass in string "2^3" or or "wm + 3m" ...
-    //assertEquals((unicalc1.R()),(new Power(new Value(new Quantity(2.0)),3)));
-    assertEquals((unicalc1.R()),(new Power(new Value(quantity(2.0),3))));
-  }
-  
-  /**
-   *
-   */
-  @Test
-  public void testQ()
-  {
-    //assertEquals( ( unicalc2.Q() ), ( new Product( (new Power), (new Value) ) ) );
-  }
-  
-  /**
-   *
-   */
-  @Test
-  public void testK()
-  {
+    public void testR()
+    {
+      //pass in string "2^3" or or "wm + 3m" ...
+      assertEquals((unicalc1.R()),(new Power(new Value(new Quantity(2.0,empty,
+                  empty)),3)));
+    }
 
-  }
-  
-  /**
-   *
-   */
+  /** This method checks if Q method correctly multiples with parentheses */
   @Test
-  public void testP()
-  {
+    public void testQ()
+    {
+      assertEquals((unicalc2.Q()),(new Product((new Value(new Quantity(2.0,
+                    empty,empty))), (new Value(new Quantity(3.0,empty,empty))))));
+    }
 
-  }
-  
-  /**
-   *
-   */
+  /** This method checks if K method correctly negates */
   @Test
-  public void testE()
-  {
+    public void testK()
+    {
+      assertEquals((unicalc3.K()),(new Negation(new Value(new Quantity(2.0,
+                  empty,empty)))));
+    }
 
-  }
-  
-  /**
-   *
-   */
+  /** This method checks if P method correctly deals with * and / */
   @Test
-  public void testL()
-  {
+    public void testP()
+    {
+      assertEquals((unicalc4.P()),(new Product((new Value(new Quantity(2.0,
+                    empty,empty))), (new Value(new Quantity(3.0,empty,empty))))));
+      assertEquals((unicalc5.P()),(new Quotient((new Value(new Quantity(2.0,
+                    empty,empty))), (new Value(new Quantity(3.0,empty,empty))))));
+    }
 
-  }
-  
-  /**
-   *
-   */
+  /** This method checks if E method correctly deals with + and - */
   @Test
-  public void testS()
-  {
+    public void testE()
+    {
+      assertEquals((unicalc6.E()),(new Sum((new Value(new Quantity(2.0,
+                    empty,empty))), (new Value(new Quantity(3.0,empty,empty))))));
+      assertEquals((unicalc7.E()),(new Difference((new Value(new Quantity(2.0,
+                    empty,empty))), (new Value(new Quantity(3.0,empty,empty))))));
+    }
 
-  }
+  /** This method checks if L method correctly normalizes values */
+  @Test
+    public void testL()
+    {
+      assertEquals((unicalc8.L()),(new Normalize(new Product(new Value(new 
+                  Quantity(3.0,empty,empty)),new Value(new Quantity(1.0,
+                    Arrays.asList("km"),empty))))));
+    }
+
+  /** This method checks if S method correctly defines 1st unit as 2nd unit*/
+  @Test
+    public void testS()
+    {
+      assertEquals((unicalc9.S()),(new Define("km",new Product(new Value(new
+                  Quantity(3.0,empty,empty)),new Value(new Quantity(1.0,
+                    Arrays.asList("m"),empty))))));
+    }
 }
