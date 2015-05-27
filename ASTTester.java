@@ -1,5 +1,12 @@
-//XXX change package
-package hw8solutions;
+/* CSE12 Homework 8
+ * Brianna Torres Yamanaka: A10690742, cs12spq
+ * Jessica Yang: A98071336, cs12sim
+ * Jessica Sec A00
+ * Brianna: Sec A01
+ * 5.23.15
+ */
+ 
+package hw8;
 
 import static org.junit.Assert.*;
 import org.junit.*;
