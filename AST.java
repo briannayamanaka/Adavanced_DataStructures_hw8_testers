@@ -54,11 +54,11 @@ class Product implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the left subtree
-    Quantity leftNode = this.left.eval(env);
+    Quantity leftTree = this.left.eval(env);
     //recursively evaluate the right subtree
-    Quantity rightNode = this.right.eval(env);
+    Quantity rightTree = this.right.eval(env);
     //multiply left and right node and store it as new quantity
-    Quantity product = leftNode.mul(rightNode);
+    Quantity product = leftTree.mul(rightTree);
     //return the multiplied quantity
     return product;
   }
@@ -94,11 +94,11 @@ class Quotient implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the left subtree
-    Quantity leftNode = this.left.eval(env);
+    Quantity leftTree = this.left.eval(env);
     //recursively evaluate the right subtree
-    Quantity rightNode = this.right.eval(env);
+    Quantity rightTree = this.right.eval(env);
     //divide left and right node and store it as new quantity
-    Quantity quotient = leftNode.div(rightNode);
+    Quantity quotient = leftTree.div(rightTree);
     //return the divided quantity
     return quotient;
   }
@@ -134,9 +134,9 @@ class Power implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate child subtree
-    Quantity childNode = this.child.eval(env);
+    Quantity childTree = this.child.eval(env);
     //calculate the power of child node to the exponent node
-    Quantity power = childNode.pow(exponent);
+    Quantity power = childTree.pow(exponent);
     //return the powered quantity
     return power;
   }
@@ -172,11 +172,11 @@ class Sum implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the left subtree
-    Quantity leftNode = this.left.eval(env);
+    Quantity leftTree = this.left.eval(env);
     //recursively evaluate the right subtree
-    Quantity rightNode = this.right.eval(env);
+    Quantity rightTree = this.right.eval(env);
     //calculate the sum of the left node and the right node
-    Quantity sum = leftNode.add(rightNode);
+    Quantity sum = leftTree.add(rightTree);
     //return the added quantity
     return sum;
   }
@@ -212,11 +212,11 @@ class Difference implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the left subtree
-    Quantity leftNode = this.left.eval(env);
+    Quantity leftTree = this.left.eval(env);
     //recursively evaluate the right subtree
-    Quantity rightNode = this.right.eval(env);
+    Quantity rightTree = this.right.eval(env);
     //calculate the difference of left node and right node
-    Quantity difference = leftNode.sub(rightNode);
+    Quantity difference = leftTree.sub(rightTree);
     //return the subtracted quantities
     return difference;
   }
@@ -250,9 +250,9 @@ class Negation implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //revursively evaluate the child subtree
-    Quantity childNode = this.child.eval(env);
+    Quantity childTree = this.child.eval(env);
     //calculate the negation of child node
-    Quantity negation = childNode.negate();
+    Quantity negation = childTree.negate();
     //return the negated quantity
     return negation;
   }
@@ -320,9 +320,9 @@ class Normalize implements AST
   public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the child subtree
-    Quantity childNode = this.child.eval(env);
+    Quantity childTree = this.child.eval(env);
     //normalize the child node
-    Quantity normalize = childNode.normalize(env);
+    Quantity normalize = childTree.normalize(env);
     //return the normalized quantity
     return normalize;
   }
