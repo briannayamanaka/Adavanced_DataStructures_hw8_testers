@@ -343,10 +343,10 @@ public class QuantityTester {
     assertTrue(day.hashCode() == dayC.hashCode());
     Quantity gravCC = new Quantity(6.67259e-11, Arrays.asList("meter", "meter", "newton"),
         Arrays.asList("kg", "kg"));
-    assertTrue(gravC.hashCode() == gravCC);
+    assertTrue(gravC.hashCode() == gravCC.hashCode());
     Quantity horsepowerC = new Quantity(550.0, Arrays.asList("foot", "pound_force"),
         Arrays.asList("second"));
-    assertTrue(horsepower.hashCode() == horsepowerC);
+    assertTrue(horsepower.hashCode() == horsepowerC.hashCode());
 	}
 
   /**
