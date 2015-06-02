@@ -336,12 +336,18 @@ public class QuantityTester {
    */
   @Test
   public void testHashCode() {
-    assertEquals(48563, empty.hashCode());
-    assertEquals(1281040251, year.hashCode());
-    assertEquals(-119735459, gravC.hashCode());
-    assertEquals(1227204776, centimeter.hashCode());
-    assertEquals(-464128768, day.hashCode());
-  }
+    assertFalse(empty.hashCode() == horsepower.hashCode());
+    assertFalse(day.hashCode() == year.hashCode());
+    assertFalse(gravC.hashCode() == centimeter.hashCode());
+    Quantity dayC = new Quantity(24.0, Arrays.asList("hour"), emptyList);
+    assertTrue(day.hashCode() == dayC.hashCode());
+    Quantity gravCC = new Quantity(6.67259e-11, Arrays.asList("meter", "meter", "newton"),
+        Arrays.asList("kg", "kg"));
+    assertTrue(gravC.hashCode() == gravCC);
+    Quantity horsepowerC = new Quantity(550.0, Arrays.asList("foot", "pound_force"),
+        Arrays.asList("second"));
+    assertTrue(horsepower.hashCode() == horsepowerC);
+	}
 
   /**
    * Tester for normalized unit.
