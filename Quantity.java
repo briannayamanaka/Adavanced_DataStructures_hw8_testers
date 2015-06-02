@@ -9,6 +9,10 @@
 package hw8;
 
 import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.text.DecimalFormat;
 
 /**
@@ -22,8 +26,9 @@ import java.text.DecimalFormat;
  */
 public class Quantity
 {
+
   //instance variable to represent the numerical value itself
-  private double numericalValue;
+  private static double num;
 
   //instance variable to represent the string unit of a quantity
   private Map<String,Integer> units;
@@ -35,391 +40,469 @@ public class Quantity
   public Quantity()
   {
     //set quantity to be of value one
-    numericalValue = 1;
+    num = 1;
     //create a new hashmap with no entries
     units = new HashMap();
   }
 
-  /** 1-arg constructor. Creates a deep copy ie the new Quantity will
+  /**
+   * 1-arg constructor. Creates a deep copy ie the new Quantity will
    * be a dif object with its own instance variables and will contain
    * a copy of the Map object referenced by the argument Quantity.
-   * @param toCopy A Quantity argument
+   * @param copy the Quantity object that will be deep copied.
    */
-  public Quantity(Quantity toCopy) throws IllegalArgumentException
+  public Quantity(Quantity toCopy)
   {
-    //if passed in map is null, throw exception
-    if(toCopy == null)
-    {
-      throw new IllegalArgumentException("1-arg constructor passing in null");
-    }
     //set numerical value to be passed in quantity's numerical value
-    this.numericalValue = toCopy.numericalValue;
-
+    this.num = toCopy.getNum();
     //create a new map with toCopy's datafield
-    this.units = new HashMap(toCopy.units);
+    this.units = new HashMap(toCopy.getUnits());
   }
 
-  /** 3-arg constructor. Creates a quantity with three passed in paramaters.
-   * @param numericValue
-   * @param posExpUnits
-   * @param negExpUnits
+  /**
+   * 3-argument constructor. Creates a quantity with 3 passed in
+   * parameters, one list representing the numerator units and the
+   * other representing the denominator units.
+   * @throws IllegalArgumentException if either of the list argument is null.
+   * @param num the numeric value.
+   * @param numerator units in the numerator(positive exponents).
+   * @param denominator units in the denominator(negative exponents).
    */
-  public Quantity(double paramNumericalValue, List<String> posExpUnits,
-      List<String> negExpUnits) throws IllegalArgumentException
+  public Quantity(double value, List<String> numerator,
+      List<String> denominator) throws IllegalArgumentException
   {
-    //if unit with negative exponent is null throw exception
-    if(negExpUnits == null)
+    //throw new illegal argument exception when trying to pass in null
+    if(numerator == null || denominator == null)
+      throw new IllegalArgumentException("Units cannot be null.");
+    //set numerical value to be passed
+    num = value;
+    //create a new hashmap
+    units = new HashMap();
+    //create an interator for each list to traverse through the elements
+    Iterator numerIter = numerator.iterator();
+    Iterator denomIter = denominator.iterator();
+    //create holder instance variables for the elements
+    String numerUnit = "";
+    String denomUnit = "";
+    //a while loop that loops through the numerator list
+    while(numerIter.hasNext())
     {
-      throw new IllegalArgumentException("3-arg constructor passing in" +
-          "null unit with negative exponent");
+      //numerUnit stores the string value of unit that is going to be mapped
+      numerUnit = (String)numerIter.next();
+      //call the method to store in the hashmap
+      //the numerator list has positive 1 value of the exponent
+      adjustExponentBy(numerUnit, 1);
     }
-    //if unit with positive exponent is null throw exception
-    if(posExpUnits == null)
+    //a while loop that loops through the denominator list
+    while(denomIter.hasNext())
     {
-      throw new IllegalArgumentException("3-arg constructor passing in" +
-          "null unit with positve exponent");
+      denomUnit = (String)denomIter.next();
+      //the denominator list has negative 1 value of the exponent
+      adjustExponentBy(denomUnit, -1);
     }
-    //create a new unit
-    this.setUnits(new HashMap());
-
-    //set the numerical value to be passed in numerical value
-    this.setNumericalValue(paramNumericalValue);
-
-    //create string for positive exponential unit
-    String posExpString = posExpUnits.get(0);
-
-    //create string for negative exponential unit
-    String negExpString = negExpUnits.get(0);
-
-    //create an int for the initial pos exponent
-    int posExponentValue = 0;
-
-    //create an int for the initial neg exponent
-    int negExponentValue = 0;
-
-    //calculate the exponent numerical value by counting strings
-    calculateExponentInConstructor(posExpString, negExpString,
-        posExpUnits, negExpUnits, 0, 0);
   }
 
-  /** This method returns the quantity as a String
-   * @return String quantity
+  /**
+   * Method that takes a single Quantity argument, multiplies this by the
+   * argument and returns the result.
+   * @throws IllegalArgumentException if its argument is null.
+   * @param multiple the Quantity that is going to be multiplied to.
+   * @return brand new Quantity object of the result.
    */
- public String toString()
-{
-  double valueOfTheQuantity = this.numericalValue;
-  Map<String,Integer> mapOfTheQuantity = this.units;
+  public Quantity mul(Quantity multiple) throws IllegalArgumentException
+  {
+    //if statement that checks the exception
+    if(multiple == null)
+      throw new IllegalArgumentException("Cannot multiply null.");
 
-  // Ensure we get the units in order
-  TreeSet<String> orderedUnits =  
-      new TreeSet<String>(mapOfTheQuantity.keySet());
+    //create new Quantity that's going to be returned
+    Quantity temp = new Quantity();
+    //multiply the numerical values of each quantity
+    temp.setNum((double)(multiple.getNum() * getNum()));
+    //create new hashmap with same mappings as this quantity
+    temp.setUnits(new HashMap(units));
 
-  StringBuffer unitsString = new StringBuffer();
+    //create an iterator to traverse through the set of parameters map
+    Iterator setIter = multiple.getUnits().keySet().iterator();
+    //create a holer variable while traversing through the set
+    String unit = "";
+    //a while loop that loops through each element in the set
+    while(setIter.hasNext())
+    {
+      //store the next value in the holder created earlier
+      unit = (String)setIter.next();
+      //get the int value(exponent) corresponding to the string value
+      Integer exponent = multiple.getUnits().get(unit).intValue();
+      //call the method and combine with existing values
+      //positive exponent adding onto current one beacuse multiplying
+      temp.adjustExponentBy(unit, exponent);
+    }
 
-  for (String key : orderedUnits) {
-    int expt = mapOfTheQuantity.get(key);
-    unitsString.append(" " + key);
-    if (expt != 1)
-         unitsString.append("^" + expt);
+    return temp;
   }
-  // Used to convert doubles to a string with a 
-  //   fixed maximum number of decimal places.
-  DecimalFormat df = new DecimalFormat("0.0####");
 
-  // Put it all together and return.
-  return df.format(valueOfTheQuantity) 
-           + unitsString.toString();
-  }
-
-  /** This method multiplies this by the argument and returns the result
-   *  Returned value should be a brand new Quantity object
-   *  Neither this quantity nor the argument quantity should cnage
-   *  @param Quantity paramQuantity. to multiply this by
-   *  @return Quantity newQuantity with multiplied numercal values and units
+  /**
+   * Method that takes a single Quantity argument, divides this by the
+   * argument, and returns the result.
+   * @throws IllegalArgumentException if its argument is null or value is 0.
+   * @param divide the Quantity that is going to be divided.
+   * @return brand new Quantity object of the result.
    */
-  public Quantity mul(Quantity paramQuantity) throws IllegalArgumentException
+  public Quantity div(Quantity divide) throws IllegalArgumentException
   {
-    if(paramQuantity == null)
+    //check exceptions
+    if(divide == null)
+      throw new IllegalArgumentException("Cannot divide null.");
+    if(divide.getNum() == 0)
+      throw new IllegalArgumentException("Cannot divide by 0.");
+
+    //create new quantity that's going to be returned
+    Quantity temp = new Quantity();
+    //calculate the numerical values of each quantity
+    temp.setNum((double)(getNum() / divide.getNum()));
+    //create new hashmap with same mappings as this quantity
+    temp.setUnits(new HashMap(units));
+
+    //create an iterator to traverse through the set of parameters map
+    Iterator setIter = divide.getUnits().keySet().iterator();
+    //create holder variable while traversing
+    String unit = "";
+    //while loop that loops through
+    while(setIter.hasNext())
     {
-      throw new IllegalArgumentException("mul method in Quantity.java passing"+
-          "in null Quantity");
+      //store the next value in holder
+      unit = (String)setIter.next();
+      //get the int value(exponent) corresponding to string value
+      Integer exponent = divide.getUnits().get(unit).intValue();
+      //call the method and combine with existing with existing value
+      //use negative exponent and substracting fromg current one
+      //because it is dividing
+      temp.adjustExponentBy(unit, -exponent);
     }
-    //create the new quantity we are to return
-    Quantity newQuantity = new Quantity();
 
-    //create double to hold calling object's numerical value
-    double thisNumericalValue = this.getNumericalValue();
-
-    //create double to hold param object's numerical value
-    double paramNumericalValue = paramQuantity.getNumericalValue();
-
-    //create double to hold value of two prev values multiplied
-    double product = thisNumericalValue * paramNumericalValue;
-
-    //create a map to hold calling object's units with exp's
-    //Map<String,Integer> thisQuantityUnits = this.getUnits();
-
-    //create a map to hold parm object's units with exp's
-    //Map<String,Integer> paramQuantityUnits = paramQuantity.getUnits();
-
-    //concatenate dif strings?
-    //insert code here
-
-    //set new quantity's numerical value to be the product
-    newQuantity.setNumericalValue(product);
-
-    //HELP should we concatenate paramQuantity's units to this???
-    
-    //set new quantity's units to hold calling object's units with exp's
-    newQuantity.setUnits(new HashMap(this.getUnits()));
-
-    //calculate exponents (ie count strings)
-    calculateExponentInMul(paramQuantity);
-
-    return newQuantity;
+    return temp;
   }
 
-  /** this method divides this by the argument and returns the result
-   * Returned value should be a brand new Quantity object
-   * Neither this quantity nor the argument quantity should change
-   * @param Quantity paramQuantity. to divide this by
-   * @return Quantity newQuantity with divided numerical values and units
+  /**
+   * Method that takes a single int argument and raises this to the given
+   * power.
+   * @param power the Quantity that is going to be raised to.
+   * @return brand new Quantity object of the result.
    */
-  public Quantity div(Quantity paramQuantity) throws IllegalArgumentException
+  public Quantity pow(int power)
   {
-    if(paramQuantity == null || paramQuantity.getNumericalValue() == 0)
+    //create new quantity thats going to be returned
+    Quantity temp = new Quantity();
+    //calculate the numerical values of each quantity
+    temp.setNum((double)Math.pow(getNum(), power));
+    //create a fresh empty hashmap without same mapping as this
+    temp.setUnits(new HashMap());
+
+    //create iterator traverse through the map
+    Iterator setIter = getUnits().keySet().iterator();
+    //holder variable for traversing
+    String unit = "";
+
+    //for loop that traverse through the set
+    while(setIter.hasNext())
     {
-      throw new IllegalArgumentException("div method in Quantity.java passing" +
-          "in null quantity or trying to divide by 0");
+      //store the next value
+      unit = (String)setIter.next();
+      //get the exponent value from the list
+      //the set returns Integer object but automatically unwraps to
+      //primitive int
+      int exponent = getUnits().get(unit);
+      //call the method and calculate the new value of quantity
+      temp.adjustExponentBy(unit, exponent * power);
     }
-    //create the new quantity we're gonna return
-    Quantity newQuantity = new Quantity();
 
-    //create double to hold calling object's numerical value
-    double thisNumericalValue = this.getNumericalValue();
-
-    //create double to hold param object's numerical value
-    double paramNumericalValue = paramQuantity.getNumericalValue();
-
-    //create a double to hold value of two prev values divided
-    double quotient = thisNumericalValue/paramNumericalValue;
-
-    //set new quantity's numerical value to be the product
-    newQuantity.setNumericalValue(quotient);
-
-    //HELP should i concatenate units ???
-
-    //set new quantity's units to hold calling object's units with exp's
-    newQuantity.setUnits(new HashMap(this.units));
-
-    //calculate exponents
-    calculateExponentInDiv(paramQuantity);
-
-    return newQuantity;
+    return temp;
   }
 
-  /** This method raises this to the given power and returns the result
-   * It takes in a single int argument (positive, negative, or zero)
-   * The result should be a brand new Quantity object
-   * This quantity should not change
-   * @param int powerInt
-   * @return Quantity newQuantity
+  /**
+   * Method that takes a single Quantity argument and adds this to it.
+   * @throws IllegalArgumentException if its argument is null or different units.
+   * @param add the Quantity that is going to be added.
+   * @return brand new Quantity object of the result.
    */
-  public Quantity pow(int powerInt)
+  public Quantity add(Quantity add) throws IllegalArgumentException
   {
-    Quantity newQuantity = new Quantity();
+    //check for exceptions
+    if(add == null)
+      throw new IllegalArgumentException();
+    if(!add.getUnits().equals(getUnits()))
+      throw new IllegalArgumentException();
 
-    return newQuantity;
+    //create new quantity that's going to be returned
+    Quantity temp = new Quantity();
+    //add the numerical values, since we're not changing the units here, so
+    //no need to call the adjust method
+    temp.setNum((double)(add.getNum() + getNum()));
+    //the quantity has a new hashmap that has the same mapping as this
+    temp.setUnits(new HashMap(units));
+
+    return temp;
   }
 
-  ///////////////////////////////helper methods////////////////////////////////
-
-  /** calculate exponent in the div method */
-  public void calculateExponentInDiv(Quantity paramQuantity)
-  {
-    //loop through ever string in units hash map
-    for(String string : paramQuantity.units.keySet())
-    {
-      //if there's nothing mapped to our current key
-      if(((Integer)paramQuantity.units.get(string)) == null)
-      {
-        //map a zero to it
-        paramQuantity.units.put(string,new Integer(0));
-      }
-      //if paramQuantity's map has this current key
-      if(paramQuantity.units.containsKey(string))
-      {
-        //get the value to which the string is mapped
-        int keysMappedValue =
-          ((Integer)paramQuantity.units.get(string)).intValue();
-
-        //HELP how do i know whether to increment or decrement
-        //ie how do i know ifim working with pos or neg exponent
-        //how do i make my helper method so it works with both pos and neg exp's
-
-        //adjust the exponent's value count (first time keysMappedvalue == 0)
-        int exponentsValue = keysMappedValue++;
-
-        //add new integer to quantity hash map ie either increase or decrease it
-        paramQuantity.units.put(string,new Integer(exponentsValue));
-      }
-      //if our units map doesnt have this key (string) put it in
-      else
-      {
-        //HELP how do i know whether im adding a key that has
-        //a neg exponent or a pos exponent???
-        //put it in and set its key to map to the integer 1 or -1
-        this.units.put(string,new Integer(1));
-      }
-    }
-  }
-
-  /** calculate exponent in the mul method */
-  public void calculateExponentInMul(Quantity paramQuantity)
-  {
-    //loop through ever string in units hash map
-    for(String string : paramQuantity.units.keySet())
-    {
-      //if there's nothing mapped to our current key
-      if(((Integer)paramQuantity.units.get(string)) == null)
-      {
-        //map a zero to it
-        paramQuantity.units.put(string,new Integer(0));
-      }
-      //if paramQuantity's map has this current key
-      if(paramQuantity.units.containsKey(string))
-      {
-        //get the value to which the string is mapped
-        int keysMappedValue =
-          ((Integer)paramQuantity.units.get(string)).intValue();
-
-        //HELP how do i know whether to increment or decrement
-        //ie how do i know ifim working with pos or neg exponent
-        //how do i make my helper method so it works with both pos and neg exp's
-
-        //adjust the exponent's value count (first time keysMappedvalue == 0)
-        int exponentsValue = keysMappedValue++;
-
-        //add new integer to quantity hash map ie either increase or decrease it
-        paramQuantity.units.put(string,new Integer(exponentsValue));
-      }
-      //if our units map doesnt have this key (string) put it in
-      else
-      {
-        //HELP how do i know whether im adding a key that has
-        //a neg exponent or a pos exponent???
-        //put it in and set its key to map to the integer 1 or -1
-        this.units.put(string,new Integer(1));
-      }
-    }
-  }
-
-  /** calculate exponent in the 3 arg constructor
-   *@param String for the positive exponent unit
-   *@param String for the negative exponent unit
-   *@param List for the positive exponent strings
-   *@param List for the negative exponent strings
-   *@param int for the value of the positive exponent
-   *@param int for the value of the negative exponent
+  /**
+   * Method that takes a single Quantity argument and subtracts it from this.
+   * @throws IllegalArgumentException if its argument is null or different units.
+   * @param subtract the Quantity that is going to be subtracted.
+   * @return brand new Quantity object of the result.
    */
-  public void calculateExponentInConstructor(String posExpString,
-      String negExpString, List posExpUnits, List negExpUnits,
-      int posExponentValue, int negExponentValue)
+  public Quantity sub(Quantity subtract) throws IllegalArgumentException
   {
-    //loop through pos exp list and count how many of each string 
-    for(int i = 0; i < posExpUnits.size(); i++)
-    {
-      //set string to next string in list
-      posExpString = ((String)posExpUnits.get(i));
+    //check for exceptions
+    if(subtract == null)
+      throw new IllegalArgumentException();
+    if(!subtract.getUnits().equals(getUnits()))
+      throw new IllegalArgumentException();
 
-      //if there's nothing mapped to our key
-      if(((Integer)this.units.get(posExpString)) == null)
-      {
-        //map zero to it
-        this.units.put(posExpString,new Integer(0));
-      }
-      //if our units map has this key (string) (ie m for meter)
-      if(this.units.containsKey(posExpString))
-      {
-          //get the value to which the string is mapped or null if not mapping
-          int keysMappedValue = ((Integer)this.units.get(posExpString)).intValue();
+    //create new quantity that's going to be returned
+    Quantity temp = new Quantity();
+    //calculate the numerical value of the new quantity
+    temp.setNum((double)(getNum() - subtract.getNum()));
+    //set the quantity's hashmap to be the same mapping as this
+    //since we're not changing the unit in subtraction, we do not
+    //need to adjust the exponents like divide and multiply
+    temp.setUnits(new HashMap(units));
 
-          //adjust the exponent's value count (first time keysMappedValue == 0)
-          posExponentValue = keysMappedValue++;
-
-          //add new integer to our quantity hash map..aka increase it
-          this.units.put(posExpString,new Integer(posExponentValue));
-      }
-      //if our units map doesnt have this key (string) put it in
-      else
-      {
-        //put it in and set its kep to map to the integer 1
-        this.units.put(posExpString,new Integer(1));
-      }
-    }
-    //loop through neg exp list and count how many items are in each list
-    for(int i = 0; i < negExpUnits.size(); i++)
-    {
-      //set string to next string in list
-      negExpString = ((String)negExpUnits.get(i));
-
-      //if there's nothing mapped to our key
-      if(((Integer)this.units.get(negExpString)) == null)
-      {
-        //map zero to it
-        this.units.put(negExpString,new Integer(0));
-      }
-      //if our units map has this key (string) (ie m for meter)
-      if(this.units.containsKey(negExpString))
-      {
-          //get the value to which the string is mapped or null if not mapping
-          int keysMappedValue = ((Integer)this.units.get(negExpString)).intValue();
-
-          //adjust the exponent's value count (first time keysMappedValue == 0)
-          posExponentValue = keysMappedValue--;
-
-          //add new integer to our quantity hash map..aka decrease it
-          this.units.put(posExpString,new Integer(negExponentValue));
-      }
-      //if our units map doesnt have this key (string) put it in
-      else
-      {
-        //put it in and set its kep to map to the integer 1
-        this.units.put(negExpString,new Integer(-1));
-      }
-    }
+    return temp;
   }
 
-  /** gets numerical value of a quantity 
-   * @return double referencing calling object's numerical value
-   * */
-  public double getNumericalValue()
-  {
-    return this.numericalValue;
+  /**
+   * Method that takes no arguments and negates this Quantity.
+   * @return the negation of this Quantity.
+   */
+  public Quantity negate() {
+    //create a new holder quantity that's going to be returned
+    Quantity temp = new Quantity();
+    //negate the numerical value by calculating a negative of current
+    //numerical value
+    temp.setNum(-temp.getNum());
+    //since we're not changing the unit values in the hashmap, just
+    //copy the current map value
+    temp.setUnits(new HashMap(units));
+
+    return temp;
   }
 
-  /** gets units of a quantity 
-   * @return Map<String,Integer> referencing calling object's units
+  /**
+   * Method that returns the Quantity as a string.
+   * @return the string of the Quantity.
+   */
+  public String toString() {
+    double valueOfTheQuantity = this.num;
+    Map<String,Integer> mapOfTheQuantity = this.units;
+
+    // Ensure we get the units in order
+    TreeSet<String> orderedUnits =
+        new TreeSet<String>(mapOfTheQuantity.keySet());
+    StringBuffer unitsString = new StringBuffer();
+
+    for (String key : orderedUnits) {
+      int expt = mapOfTheQuantity.get(key);
+      unitsString.append(" " + key);
+      if (expt != 1) unitsString.append("^" + expt);
+    }
+    // Used to convert doubles to a string with a 
+    //   fixed maximum number of decimal places.
+    DecimalFormat df = new DecimalFormat("0.0####");
+
+    // Put it all together and return.
+    return df.format(valueOfTheQuantity) + unitsString.toString();
+  }
+
+  /**
+   * Method that takes any single object and returs true if and only if
+   * the object is a Quantity whose units are exactly the same as the
+   * calling object and whose value is the same when rounded to five places
+   * after decimal point.
+   * @param compare the object that is compared to.
+   * @return true if the object is same or not.
+   */
+  public boolean equals(Object compare)
+  {
+    //check if the comparing object is null or not and is an object of
+    //Quantity, if not, then theyre not equal at first place
+    if((compare != null) && (compare instanceof Quantity))
+    {
+      //compare the string value of both objects and if theyre equal,
+      //then return true.
+      boolean result = toString().equals(compare.toString());
+      return result;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Method that returns an integer such that equal Quantities always returns
+   * the same integer.
+   * @return the hash code of the Quantity.
+   */
+  public int hashCode()
+  {
+    //return the hashcode of the string value
+    return this.toString().hashCode();
+  }
+
+  /**
+   * Method that takes a string(name of a unit) and a map(a units database),
+   * and create a brand-new normalized Quantity equivalent to one of the given
+   * unit.
+   * @param name the name of the unit.
+   * @param data units database.
+   * @return a brand-new normalized Quantity.
+   */
+  public static Quantity normalizedUnit(String name, Map<String, Quantity> data)
+  {
+    //create new quantity that stores the returning quantity
+    Quantity temp;
+
+    //check if the database contains the unit already
+    if(data.containsKey(name))
+    {
+      //get the data value value and store in holder
+      temp = data.get(name);
+      //normalize the quantity that matches the string value
+      temp = temp.normalize(data);
+    }
+    else
+    {
+      //If the unit does not appear as a key in the database returns
+      //a new Quantity representing 1 of the argument unit
+      List<String> empty = Collections.<String>emptyList();
+      temp = new Quantity(1,Arrays.asList(name),empty);
+    }
+
+    return temp;
+  }
+
+  /**
+   * Method that takes in a database and returns a copy of this but normalized
+   * form (with all defined units expanded out into primitive units).
+   * @param data the database of the unit.
+   * @return the copy of this Quantity in normalized form.
+   */
+  public Quantity normalize(Map<String, Quantity> data)
+  {
+    //create a new holder temp quantity that's going to be returned
+    //in the end of method
+    Quantity temp = new Quantity();
+    //set the numerical value the same as this quantity
+    temp.setNum(getNum());
+
+    //create an iterator used to traverse through the map set
+    Iterator setIter = getUnits().keySet().iterator();
+    //holder variable while traversing
+    String unit = "";
+
+    //while loop that traverse through the set
+    while(setIter.hasNext())
+    {
+      //put the next value in the holder variable
+      unit = (String)setIter.next();
+      //get the value corresponding to the current key
+      //the set returns Integer object, but it is automatically
+      //unwrapped to primitive integer
+      int exponent = getUnits().get(unit);
+      //normalize the unit by calling the normalized unit method on
+      //the string value and database
+      Quantity normalized = normalizedUnit(unit, data);
+      //if the exponent value of the string is positive, then add
+      //the units onto the returning quantity
+      if(exponent > 0)
+      {
+        //multiply(add units) depending on the exponent value
+        for(int i = 0; i < exponent; i++)
+          temp = temp.mul(normalized);
+      }
+      //if the exponent value of the string is negative, then subtract
+      //the units from the returning quantity
+      if(exponent < 0)
+      {
+        //divide(subtract units) depending on the exponent value
+        for(int i = 0; i > exponent; i--)
+          temp = temp.div(normalized);
+      }
+    }
+
+    return temp;
+  }
+
+  /* **************************\
+   *       HELPER METHODS      *
+   \***************************/
+
+  /**
+   * Gets the numerical value of quantity.
+   * @return double referencing calling object's numerical value.
+   */
+  public double getNum()
+  {
+    return num;
+  }
+
+  /**
+   * Gets the units of a quantity.
+   * @return Map<String,Integer> referencing calling object's units.
    */
   public Map<String,Integer> getUnits()
   {
-    return this.units;
+    return units;
   }
 
-  /** sets numerical value of a quantity
-   * @param double the numerical value we're setting to
+  /**
+   * Sets the numerical value of a quantity.
    */
-  public void setNumericalValue(double paramNumericalValue)
+  public static void setNum(double value)
   {
-    this.numericalValue = paramNumericalValue;
+    num = value;
   }
 
-  /** sets units of a quantity
-   * @param Map<String,Integer> the units we are to set to
+  /**
+   * Sets the units of a quantity.
    */
-  public void setUnits(Map<String,Integer> paramUnits)
+  public void setUnits(Map<String, Integer> unit)
   {
-    this.units = paramUnits;
+    units = unit;
+  }
+
+  /**
+   * Private helper method that adds to the existing exponent in the
+   * units map; It adds the unit to the map if it wasnt there already,
+   * and deletes it from the map, if the adjusted exponent is 0.
+   * @param unit the string name of the unit
+   * @param exponent the exponent value of the unit
+   */
+  private void adjustExponentBy(String unit, int exponent)
+  {
+    //if the string name is already contained in the map, then add onto
+    //the current map
+    if(units.containsKey(unit))
+    {
+      //get the existing exponent value thats stored in the map already
+      //the map returns Integer object, but automatically unwraps to
+      //primitive integer
+      int currentPow = units.get(unit);
+      //add the exponent to the existing one, this is the adjusted exponent
+      currentPow += exponent;
+      //if the resulting value is 0, then delete it from the map
+      if(currentPow == 0)
+        units.remove(unit);
+      //if not 0, then update the unit to the hashmap
+      else
+        //add the updated version of the unit and its value
+        //If the map previously contained a mapping for the key,
+        //the old value is replaced.
+        units.put(unit, new Integer(currentPow));
+    }
+    //if the string name is not on the map, then create a new key, value
+    //and add to the map.
+    else
+    {
+      units.put(unit, new Integer(exponent));
+    }
   }
 }
-
