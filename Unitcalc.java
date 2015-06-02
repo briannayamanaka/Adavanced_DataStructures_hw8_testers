@@ -9,62 +9,64 @@
 // An AST is an abstract-syntax-tree
 // Unicalc.java
 // Original Author: Chris Stone, Harvey Mudd College
-// TODO: Fill in and modify the functions below where the comments
-// suggest changes are needed so that these functions correctly parse
-// the Unicalc language
 
 // Extended by:
 
-package hw8;
+package hw8solutions;
 
-import java.util.*;        // Scanner, LinkedList, ...
-import java.util.regex.*;  // Pattern, Matcher, ...
+import java.util.*;
+import java.util.regex.*;
 
 class Unicalc
 {
+  //Used by the parser functions
+  private LinkedList<String> toks;
 
-  private LinkedList<String> toks;  // Used by the parser functions
-  //    to keep track of the remaining tokens.
-  // Initialized by tokenize(...)
-  // Parsing functions remove the tokens
-
+  /**
+   * Constructs a unicalc object that can be tokenized.
+   * Nothing we need to do in the constructor.
+   */
   public Unicalc()
   {
-    // Nothing we need to do in the constructor.
+
   }
 
-  // method tokenize
-  //   Takes a string, and sets this.toks to be a linked
-  //     list of all Unicalc tokens in this string
-  //     (ignoring whitespace, and other things that can't
-  //     be part of a token.)
-  //
+  /**Method tokenize takes a string and sets this.toks
+   * to be a linked list of all Unicalc tokens in this
+   * string (ignoring whitespace, and other things that
+   * can't be part of a token. 
+   * @param String the input given by the user
+   */
   public void tokenize(String input)
   {
-    this.toks = new LinkedList<String>( Tokenizer.tokenize( input ) );
+    //create new linked list containing user input
+    toks = new LinkedList<String>(Tokenizer.tokenize(input));
 
-    System.out.println("Tokens: " + this.toks);
+    //print out linked list
+    System.out.println("Tokens: " + toks);
 
+    //exit
     return;
   }
 
-  // method parse
-  // Tries to parse the contents of this.toks
-  //    using recursive descent, starting with the start symbol.
-  // output: an abstract syntax tree representing the input
-  //
+  /**Method parse tries to parse the contents of toks using
+   * recursive descent, starting with the start symbol.
+   * @return AST, an abstract syntax tree representing user input
+   */
   public AST parse()
   {
-    // Begin parsing with the start symbol
+    //Begin parsing with the start symbol
     AST answer = this.S();
 
-    // Display results
+    //Display results
     System.out.println("AST: " + answer);
-    if (! toks.isEmpty()) {
+
+    //if there are tokens still, print them out
+    if (!toks.isEmpty()) {
       System.out.println("Extra tokens left over: " + toks);
     }
+    //print new line and return AST
     System.out.println();
-
     return answer;
   }
 
@@ -74,161 +76,255 @@ class Unicalc
    * W -> (any word that is a unit name)
    */
 
-  //do this one seventh
+  /**Method S checks to see if we're defining and creates
+   * a new Define object if we are.
+   * @return AST, an abstract syntax tree representing a Define object
+   * S -> def W L | L
+   * do this method seventh
+   */
   public AST S()
   {
-    //  S -> def W L | L
-    AST l = L();
+    //create a string called defString
+    String defString = "def";
 
-    if(this.toks.peek().equals("def"))
+    //if next token is the same as defString
+    if(defString.equals(toks.peek()))
     {
-      
+      //remove "def" so we can check if next token is a unit
+      toks.pop();
+
+      //if the token after that is a letter (ie a unit)
+      if(isAlphabetic((String)toks.peek()))
+      {
+
+        //create a string to hold next token/unit
+        String string = (String)toks.peek();
+
+        //remove the token/unit
+        toks.pop();
+
+        //return a new Define object with our string
+        return new Define(string,L());
+      }
+      //if the token after def isn't a letter throw error
+      else
+      {
+        throw new ParseError("S(). Next token isn't a unit name");
+      }
     }
-    return l;  // I don't think we should *always* do this...
-  }
-
-  //do this one sixth
-  public AST L()
-  {
-    // L -> # E | E
-
-    AST e = E();
-
-    if(this.toks.peek().equals("#"))
-    {
-      return new Normalize(e);
-    }
-    return e;  // I don't think we should *always* do this...
-  }
-
-  //do this one fifth
-  public AST E()
-  {
-    //   E -> P + E | P - E | P
-
-    AST p = P();
-    AST e = E();
-    
-    if(this.toks.peek().equals("+"))
-    {
-      return new Sum(p,e);
-    }
-    else if(this.toks.peek().equals("-"))
-    {
-      return new Difference(p,e);
-    }
-    return p;  // I don't think we should *always* do this...
-  }
-
-  //do this one fourth
-  public AST P()
-  {
-    //   P -> K * P | K / P | K
-
-    AST p = P();
-    AST k = K();
-    if(this.toks.peek().equals("*"))
-    {
-      return new Product(k,p);
-    }
-    else if(this.toks.peek().equals("/"))
-    {
-      return new Quotient(k,p);
-    }
+    //if our first token isn't "def" return an L()
     else
     {
-      return k;  // I don't think we should *always* do this
+      return L();
     }
   }
 
-  //do this one third
+  /** Method L() checks to see if we're normalizing and creates
+   * a new normalized object if we are.
+   * @return AST, an abstract syntax tree representing a
+   * normalized value or E().
+   * L -> # E | E
+   * do this one sixth
+   */
+  public AST L()
+  {
+    //create a new string for pound sign
+    String normalizeString = "#";
+
+    //if next token matches our normalizeString 
+    if(normalizeString.equals(toks.peek()))
+    {
+      // Get rid of the #-sign token
+      toks.pop();
+
+      //return a new normalized object
+      return new Normalize(E());
+    }
+    //if next token is something else return E()
+    else
+    {
+      return E();
+    }
+  }
+
+  /** Method E() checks to see if we're adding or subtracting  and creates
+   * a new sum or difference if we are.
+   * @return AST, an abstract syntax tree representing a
+   * sum, a difference or a P()
+   * E -> P + E | P - E | P
+   * do this one fifth
+   */
+  public AST E()
+  {
+    //create a new AST P() 
+    AST p = P();
+
+    //create a new sumString
+    String sumString = "+";
+
+    //create a new diffString
+    String diffString = "-";
+
+    //if next token matches our sumString
+    if(sumString.equals(toks.peek()))
+    {
+      //get rid of the "+" sign
+      toks.pop();
+
+      return new Sum(p,E());
+    }
+
+    //if next token is a minus sign return a difference
+    else if (diffString.equals(toks.peek()))
+    {
+      //get rid of the "-" sign
+      toks.pop();
+
+      return new Difference(p,E());
+    }
+    //if next token is neither of the above return a p
+    else
+    {
+      return p;
+    }
+  }
+
+  /** Method P() checks to see if we're multiplying or dividing  and creates
+   * a new product or quotient if we are.
+   * @return AST, an abstract syntax tree representing a
+   * product, a quotient or a K()
+   * P -> K * P | K / P | K
+   * do this one fourth
+   */
+  public AST P()
+  {
+    //create a new AST K()
+    AST k = K();
+
+    //create a new asteriskString
+    String asteriskString = "*";
+
+    //create a new divideString
+    String divideString = "/";
+
+    //if token matches asteriskString, return a product
+    if(asteriskString.equals(toks.peek()))
+    {
+      //get rid of "*"
+      toks.pop();
+
+      //return a new product
+      return new Product(k,P());
+    }
+    //if token matches divideString, return a quotient
+    else if(divideString.equals(toks.peek()))
+    {
+      //get rid of "/"
+      toks.pop();
+
+      //return a new quotient
+      return new Quotient(k,P());
+    }
+    //if token doesnt match asterisk or divideString
+    else
+    {
+      //return AST K()
+      return k;
+    }
+  }
+
+  /**Method K() checks to see if we're negating and returns
+   * a new negation if we are.
+   * @return AST, a new abstract tree node representing a
+   * Negation or Q()
+   * K -> - K | Q
+   * do this one third
+   */
   public AST K()
   {
-    // NEGATION
-    // K -> - K | Q
-    AST k = K();
-    AST q = Q();
-    //if i peek and the token is a negative sign
-    if(this.toks.peek().equals("-"))
+    //create a new string negateString
+    String negateString = "-";
+
+    //if i peek and the token matches negateString
+    if(negateString.equals(toks.peek()))
     {
-      //return a new negation recursively
-      //REMEMBER Negation(AST ast)
-      return new Negation(k);
+      //get rid of "-"
+      toks.pop();
+
+      //return a new negation
+      return new Negation(K());
     }
     else
     {
       //other wise return Q, no negation
-      return q;  // I don't think we should *always* do this
+      return Q();
     }
   }
 
-  /** method isNumeric(string)
-   * @param String string
-   * @return either true or false if its a number
+  /**Method Q() checks to see if we're multiplying without
+   * an asterisk and returns a new product if we are.
+   * @return AST, a new abstract tree node representing a
+   * product or an R()
+   * Q -> R | R Q
+   * do this one second
+   * remember: Product(AST absSyntaxTree, int exponent);
    */
-  private static boolean isNumber(String s)
-  {
-    if (s == null) return false;
-
-    try {
-      Double.parseDouble(s);
-      return true;
-    } catch (NumberFormatException e) {
-      return false;
-    }
-  }
-
-  /** method isAlphabetic(string)
-   * other wise return Q, no negation
-   * @param String string
-   * @return either true or false if string is a letter
-   */
-  private static boolean isAlphabetic(String s)
-  {
-    return s != null && s.matches("[a-zA-Z_]+");
-  }
-
-  //do this one second
   public AST Q()
   {
-    //MULTIPLICATION
-    // Q -> R | R Q
-
+    //create a new AST R()
     AST r = R();
 
-    //if i peek and r is followed by a num, wrd, or (
-    if((isNumeric(this.toks.peek()) == true) ||
-        (isAlphabetic(this.toks.peek()) == true) ||
-        ("(".equals(this.toks.peek)))
+    //create a string to hold next token
+    String string = (String)toks.peek();
+
+    //create a string leftParanString
+    String leftParanString = "(";
+
+    //all cases of multiplying
+    if((isNumber(string) == true) ||
+        (isAlphabetic(string) == true) ||
+        (leftParanString.equals(string)))
     {
-      //then recursively grab return a product of r and Q
-      //REMEMBER Product(AST absSyntaxTree, int exponent);
+      //then recursively return a product of r and Q
       return new Product(r,Q());
     }
+    //if we're not multiplying, return r
     else
     {
       return r;
     }
-
-
   }
 
-  //do this one first
+  /**method R() checks to see if we're raisng to an exponent and
+   * returns an exponent if we are.
+   * @return AST, a new abstract tree representing a power function
+   * R -> V | V ^ J
+   * do this one first
+   * remember Power(AST absSyntaxTree, int exponent);
+   */
   public AST R()
   {
-    //RAISE TO THE POWER OF
-    // R -> V | V ^ J
-
+    //create a new AST V()
     AST v = V();
 
+    //create a string to represent a carrot
+    String powerString = "^";
     //if i peek and v is followed by a "to the power of" symbol
-    if("^".equals(this.toks.peek()))
+    if(powerString.equals(toks.peek()))
     {
+
+      //get rid of "^"
+      toks.pop();
+
       //return a new Power with our AST v and the exponent J
-      //REMEMBER Power(AST absSyntaxTree, int exponent);
       return new Power(v,J());
     }
-    return v;  // I don't think I should *always* do this
+    //if i peek and v is followed by something other than "^"
+    else
+    {
+      //return proper AST depending on whether its a number or letter
+      return v;
+    }
   }
 
   //  --------------------------------------------------
@@ -247,7 +343,7 @@ class Unicalc
 
     String next = toks.peek();
 
-    if ( isNumber(next) ) {
+    if (isNumber(next)) {
       // D
       double d1 = D();
       return new Value(new Quantity(d1, emp, emp));
@@ -287,34 +383,36 @@ class Unicalc
     }
   }
 
-
   // Parsing function for J in the grammar.
-  //   Note: unlike most of the parsing functions,
-  //         we're returning the corresponding int rather than an AST.
-  //
+  // Note: unlike most of the parsing functions,
+  // we're returning the corresponding int rather than an AST.
   public int J()
   {
     // J -> -I | I
-
     String next = toks.peek();
 
-    if ( "-".equals(next) ) {
-      toks.pop();       // Get rid of the minus-sign token
-      int i = I();      // Following it should be something matching I
-      return (- i);     // Combine the minus sign and i
-    } else {
-      return I();       // No minus sign, so look for something matching I
+    if ("-".equals(next))
+    {
+      // Get rid of the minus-sign token
+      toks.pop();
+      // Following it should be something matching I
+      int i = I();
+      // Combine the minus sign and i
+      return (- i);
+    }
+    else
+    {
+      // No minus sign, so look for something matching I
+      return I();
     }
   }
 
   // Parsing function for I in the grammar.
-  //   Note: unlike most of the parsing functions,
-  //         we're returning the corresponding int rather than an AST.
-  //
+  // Note: unlike most of the parsing functions,
+  // we're returning the corresponding int rather than an AST.
   public int I()
   {
     // I -> (any nonnegative integer)
-
     String next = toks.peek();
     if (next == null) {
       throw new ParseError("Expected an integer, but found null");
@@ -325,22 +423,51 @@ class Unicalc
     } catch (NumberFormatException e) {
       throw new ParseError("Expected an integer, but found: '" + next + "'");
     }
-   }
+  }
 
   // Parsing function for D in the grammar.
-  //   Note: unlike most of the parsing functions,
-  //         we're returning the corresponding double-precision
-  //         floating-point number, rather than an AST.
+  // Note: unlike most of the parsing functions,
+  // we're returning the corresponding double-precision
+  // floating-point number, rather than an AST.
   public double D() {
     // D -> (any nonnegative number, integer or floating-point)
-
     String next = toks.peek();
-    try {
+    try
+    {
       toks.pop();
       return Double.parseDouble(next);
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException e)
+    {
       throw new ParseError("Expected a number, but found: '" + next + "'");
     }
+  }
+  /** method isNumber(string)
+   * @param String string
+   * @return either true or false if its a number
+   */
+  public static boolean isNumber(String s)
+  {
+    if (s == null) return false;
+
+    try
+    {
+      Double.parseDouble(s);
+      return true;
+    }
+    catch (NumberFormatException e)
+    {
+      return false;
+    }
+  }
+
+  /** method isAlphabetic(string)
+   * other wise return Q, no negation
+   * @param String string
+   * @return either true or false if string is a letter
+   */
+  public static boolean isAlphabetic(String s)
+  {
+    return s != null && s.matches("[a-zA-Z_]+");
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -380,7 +507,6 @@ class Unicalc
 // ParseError class
 //    A new kind of exception to be thrown if there is
 //    an error in parsing
-
 class ParseError extends RuntimeException {
   public ParseError(String message) {
     // Create a ParseError object containing
@@ -388,3 +514,4 @@ class ParseError extends RuntimeException {
     super(message);
   }
 }
+
