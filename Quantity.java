@@ -28,7 +28,7 @@ public class Quantity
 {
 
   //instance variable to represent the numerical value itself
-  private static double num;
+  private double num;
 
   //instance variable to represent the string unit of a quantity
   private Map<String,Integer> units;
@@ -40,9 +40,9 @@ public class Quantity
   public Quantity()
   {
     //set quantity to be of value one
-    num = 1;
+    setNum(1.0);
     //create a new hashmap with no entries
-    units = new HashMap();
+    setUnits(new HashMap());
   }
 
   /**
@@ -54,9 +54,9 @@ public class Quantity
   public Quantity(Quantity toCopy)
   {
     //set numerical value to be passed in quantity's numerical value
-    this.num = toCopy.getNum();
+    setNum(toCopy.getNum());
     //create a new map with toCopy's datafield
-    this.units = new HashMap(toCopy.getUnits());
+    setUnits(new HashMap(toCopy.getUnits()));
   }
 
   /**
@@ -75,9 +75,12 @@ public class Quantity
     if(numerator == null || denominator == null)
       throw new IllegalArgumentException("Units cannot be null.");
     //set numerical value to be passed
-    num = value;
+    setNum(value);
+
+    System.out.println(this.num);
+
     //create a new hashmap
-    units = new HashMap();
+    setUnits(new HashMap());
     //create an interator for each list to traverse through the elements
     Iterator numerIter = numerator.iterator();
     Iterator denomIter = denominator.iterator();
@@ -100,6 +103,7 @@ public class Quantity
       //the denominator list has negative 1 value of the exponent
       adjustExponentBy(denomUnit, -1);
     }
+     
   }
 
   /**
@@ -118,7 +122,9 @@ public class Quantity
     //create new Quantity that's going to be returned
     Quantity temp = new Quantity();
     //multiply the numerical values of each quantity
-    temp.setNum((double)(multiple.getNum() * getNum()));
+    temp.setNum(multiple.num * this.num);
+    
+
     //create new hashmap with same mappings as this quantity
     temp.setUnits(new HashMap(units));
 
@@ -279,7 +285,7 @@ public class Quantity
     Quantity temp = new Quantity();
     //negate the numerical value by calculating a negative of current
     //numerical value
-    temp.setNum(-temp.getNum());
+    temp.setNum(-getNum());
     //since we're not changing the unit values in the hashmap, just
     //copy the current map value
     temp.setUnits(new HashMap(units));
@@ -456,7 +462,7 @@ public class Quantity
   /**
    * Sets the numerical value of a quantity.
    */
-  public static void setNum(double value)
+  public void setNum(double value)
   {
     num = value;
   }
