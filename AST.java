@@ -44,43 +44,42 @@ interface AST
  *  to create products of multiplied values.
  *  contains eval, toString, and equals methods
  */
-class Product
-  implements AST
+class Product implements AST
 {
-  //instance variables
   private AST left;
   private AST right;
 
-  //product constructor
-  public Product(AST paramAST1, AST paramAST2)
+  public Product(AST l, AST r)
   {
-    this.left = paramAST1;
-    this.right = paramAST2;
+    this.left = l;
+    this.right = r;
   }
-  //eval method
-  public Quantity eval(Map<String, Quantity> paramMap)
+
+  public Quantity eval(Map<String,Quantity> env)
   {
     //recursively evaluate the left subtree
-    Quantity localQuantity1 = this.left.eval(paramMap);
-
+    Quantity leftTree = this.left.eval(env);
     //recursively evaluate the right subtree
-    Quantity localQuantity2 = this.right.eval(paramMap);
-
-    //multiply left and righ tnode and store it as a new quantity
-    return localQuantity1.mul(localQuantity2);
+    Quantity rightTree = this.right.eval(env);
+    //multiply left and right node and store it as new quantity
+    Quantity product = leftTree.mul(rightTree);
+    //return the multiplied quantity
+    return product;
   }
-  //toString method
+
   public String toString()
   {
-    return "Product(" + this.left + "," + this.right + ")";
+    return ("Product(" + this.left + "," + this.right + ")");
   }
-  //equals method
-  public boolean equals(Object paramObject) {
-    if ((paramObject instanceof Product)) {
-      Product localProduct = (Product)paramObject;
-      return (localProduct.left.equals(this.left)) && (localProduct.right.equals(this.right));
+
+  public boolean equals(Object o)
+  {
+    if ( o instanceof Product )
+    {
+      Product tree = (Product)o;
+      return tree.left.equals(left) && tree.right.equals(right);
     }
-    return false;
+    else return false;
   }
 }
 
