@@ -6,7 +6,7 @@
  * 5.23.15
  */
 
-package hw8solutions;
+package hw8;
 
 import java.util.*;
 
@@ -40,6 +40,41 @@ interface AST
   public boolean equals(Object o);
 }
 
+class Product
+  implements AST
+{
+  private AST left;
+  private AST right;
+
+  public Product(AST paramAST1, AST paramAST2)
+  {
+    this.left = paramAST1;
+    this.right = paramAST2;
+  }
+
+  public Quantity eval(Map<String, Quantity> paramMap)
+  {
+    Quantity localQuantity1 = this.left.eval(paramMap);
+    Quantity localQuantity2 = this.right.eval(paramMap);
+    return localQuantity1.mul(localQuantity2);
+  }
+
+  public String toString()
+  {
+    return "Product(" + this.left + "," + this.right + ")";
+  }
+
+  public boolean equals(Object paramObject) {
+    if ((paramObject instanceof Product)) {
+      Product localProduct = (Product)paramObject;
+      return (localProduct.left.equals(this.left)) && (localProduct.right.equals(this.right));
+    }
+    return false;
+  }
+}
+
+
+/*
 class Product implements AST
 {
   private AST left;
@@ -65,7 +100,7 @@ class Product implements AST
 
   public String toString()
   {
-    return ("Product(" + left + "," + right + ")");
+    return ("Product(" + this.left + "," + this.right + ")");
   }
 
   public boolean equals(Object o)
@@ -78,7 +113,7 @@ class Product implements AST
     else return false;
   }
 
-}
+} */
 
 class Quotient implements AST
 {
