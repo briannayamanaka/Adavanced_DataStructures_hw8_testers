@@ -76,9 +76,6 @@ public class Quantity
       throw new IllegalArgumentException("Units cannot be null.");
     //set numerical value to be passed
     setNum(value);
-
-    System.out.println(this.num);
-
     //create a new hashmap
     setUnits(new HashMap());
     //create an interator for each list to traverse through the elements
@@ -103,7 +100,7 @@ public class Quantity
       //the denominator list has negative 1 value of the exponent
       adjustExponentBy(denomUnit, -1);
     }
-     
+
   }
 
   /**
@@ -123,8 +120,6 @@ public class Quantity
     Quantity temp = new Quantity();
     //multiply the numerical values of each quantity
     temp.setNum(multiple.num * this.num);
-    
-
     //create new hashmap with same mappings as this quantity
     temp.setUnits(new HashMap(units));
 
@@ -200,7 +195,7 @@ public class Quantity
     //create new quantity thats going to be returned
     Quantity temp = new Quantity();
     //calculate the numerical values of each quantity
-    temp.setNum((double)Math.pow(getNum(), power));
+    temp.setNum(Math.pow(getNum(), power));
     //create a fresh empty hashmap without same mapping as this
     temp.setUnits(new HashMap());
 
@@ -503,6 +498,11 @@ public class Quantity
         //If the map previously contained a mapping for the key,
         //the old value is replaced.
         units.put(unit, new Integer(currentPow));
+    }
+    //if exponent is 0, then the unit should be removed
+    else if(exponent == 0)
+    {
+      units.remove(unit);
     }
     //if the string name is not on the map, then create a new key, value
     //and add to the map.
